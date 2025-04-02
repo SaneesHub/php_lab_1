@@ -17,10 +17,9 @@
     ];
 
     $message = "";
-    if($_SERVER["REQUEST_METHOD"]=="POST"){
+    if($_SERVER["REQUEST_METHOD"] == "POST"){
         $name = htmlspecialchars( $_POST['name']  ?? '');
         $email = htmlspecialchars($_POST['email'] ?? '');
-        var_dump($name);
         if (!empty($name) && !empty($email)){
             $message="Спасибо, $name! Ваш email: $email";
         } else {
