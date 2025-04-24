@@ -1,0 +1,21 @@
+{
+    "name": "zoo/web",
+    "description": "Веб-сервис для покупки билетов в зоопарк",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Zoo\\Web\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Sanees"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "twig/twig": "^3.20",
+        "dompdf/dompdf": "^3.1"
+    }
+}

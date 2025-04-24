@@ -1,3 +1,6 @@
+<?php
+require_once 'db.php';
+?>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -20,6 +23,9 @@
         }
         h2 {
             color: #2c3e50;
+        }
+        a {
+            text-decoration: none;
         }
         label {
             font-weight: bold;
@@ -49,16 +55,27 @@
         button:hover {
             background-color: #a15d2c;
         }
+        .btn { 
+            display: inline-block; padding: 10px 15px; margin: 5px;
+            background: #4CAF50; color: white; text-decoration: none;
+            border-radius: 5px;
+        }
         .success {
             color: green;
             margin: 15px 0;
+        }
+        table { 
+            width: 100%; border-collapse: collapse; margin-top: 20px; 
+        }
+        th, td { 
+            padding: 8px; border: 1px solid #ddd; text-align: left; 
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Добавить животное в зоопарк</h2>
-        
+        <a href="sections.php">Секции зоопарка</a>
         <?php if (isset($_GET['success'])): ?>
             <p class="success">Данные успешно сохранены!</p>
         <?php endif; ?>
@@ -72,7 +89,11 @@
                 <option value="Обезьяна">Обезьяна</option>
                 <option value="Лев">Лев</option>
                 <option value="Медведь">Медведь</option>
-                <option value="Жираф">Жираф</option>
+                <option value="Бегемот">Бегемот</option>
+                <option value="Хамелеон">Хамелеон</option>
+                <option value="Крокодил">Крокодил</option>
+                <option value="Сокол">Сокол</option>
+                <option value="Варан">Варан</option>
             </select>
 
             <label for="cage">Номер клетки:</label>
@@ -83,8 +104,16 @@
 
             <button type="submit">Сохранить</button>
         </form>
+        <div class="action-buttons">
+            <a href="view.php" class="btn">Просмотреть данные из БД</a>
+            <a href="import.php" class="btn">Импорт из CSV в БД</a>
+        </div>
     </div>
-
+    <div style="margin-top: 20px;">
+        <a href="tickets.php" style="display: inline-block; padding: 10px 15px; background: #2196F3; color: white; text-decoration: none; border-radius: 4px;">
+            Купить билеты в зоопарк
+        </a>
+    </div>
     <script>
         function validateForm() {
             let cage = document.getElementById("cage").value.trim();
