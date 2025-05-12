@@ -1,5 +1,72 @@
 <?php
 require_once 'db.php';
+
+// Единый маппинг животных на секции
+$animalSectionMap = [
+    // Млекопитающие
+    'Тигр' => 'mammals',
+    'Слон' => 'mammals',
+    'Обезьяна' => 'mammals',
+    'Лев' => 'mammals',
+    'Медведь' => 'mammals',
+    'Жираф' => 'mammals',
+    'Бегемот' => 'mammals',
+    
+    // Рептилии
+    'Хамелеон' => 'reptiles',
+    'Варан' => 'reptiles',
+    'Крокодил' => 'reptiles',
+    
+    // Птицы
+    'Сокол' => 'birds'
+];
+
+// Опции для select
+$sectionOptions = [
+    'mammals' => 'Млекопитающие',
+    'reptiles' => 'Рептилии',
+    'birds' => 'Птицы'
+];
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $animal = trim($_POST["animal"]);
+    $cage = (int)$_POST["cage"];
+    $conditions = trim($_POST["conditions"]);
+    $selectedSection = $_POST["section"];
+    
+    // Нормализуем регистр для сравнения
+    $normalizedAnimal = mb_convert_case($animal, MB_CASE_TITLE, "UTF-8");
+    
+    // Проверяем существует ли животное в системе
+    if (!array_key_exists($normalizedAnimal, $animalSectionMap)) {
+        die("Ошибка: животное '$normalizedAnimal' не поддерживается в системе");
+    }
+    
+    // Получаем правильную секцию для этого животного
+    $correctSection = $animalSectionMap[$normalizedAnimal];
+    
+    // Сравниваем с выбранной секцией
+    if ($selectedSection !== $correctSection) {
+        $correctSectionName = $sectionOptions[$correctSection];
+        $selectedSectionName = $sectionOptions[$selectedSection];
+        die("Ошибка: $normalizedAnimal относится к секции '$correctSectionName', а не к '$selectedSectionName'");
+    }
+    
+    // Если проверки пройдены - сохраняем
+    try {
+        $stmt = $pdo->prepare("INSERT INTO zoo_db (animal, cage, condition_zoo, section) VALUES (?, ?, ?, ?)");
+        $stmt->execute([
+            htmlspecialchars($normalizedAnimal, ENT_QUOTES, 'UTF-8'),
+            $cage,
+            htmlspecialchars($conditions, ENT_QUOTES, 'UTF-8'),
+            $selectedSection
+        ]);
+        header("Location: view.php?success=1");
+        exit;
+    } catch (PDOException $e) {
+        die("Ошибка сохранения: " . $e->getMessage());
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -74,26 +141,26 @@ require_once 'db.php';
 </head>
 <body>
     <div class="container">
-        <h2>Добавить животное в зоопарк</h2>
-        <a href="sections.php">Секции зоопарка</a>
-        <?php if (isset($_GET['success'])): ?>
-            <p class="success">Данные успешно сохранены!</p>
+        <h2>Добавить животное</h2>
+        
+        <?php if (isset($error)): ?>
+            <div class="alert alert-danger"><?= $error ?></div>
         <?php endif; ?>
 
-        <form action="submit.php" method="post" onsubmit="return validateForm();">
+        <form method="POST">
             <label for="animal">Название животного:</label>
             <select id="animal" name="animal" required>
                 <option value="">-- Выберите животное --</option>
-                <option value="Тигр">Тигр</option>
-                <option value="Слон">Слон</option>
-                <option value="Обезьяна">Обезьяна</option>
-                <option value="Лев">Лев</option>
-                <option value="Медведь">Медведь</option>
-                <option value="Бегемот">Бегемот</option>
-                <option value="Хамелеон">Хамелеон</option>
-                <option value="Крокодил">Крокодил</option>
-                <option value="Сокол">Сокол</option>
-                <option value="Варан">Варан</option>
+                <?php foreach (array_keys($animalSectionMap) as $animal): ?>
+                    <option value="<?= htmlspecialchars($animal) ?>"><?= htmlspecialchars($animal) ?></option>
+                <?php endforeach; ?>
+            </select>
+
+            <label>Секция:</label>
+            <select name="section" id="sectionSelect" required>
+                <?php foreach ($sectionOptions as $value => $label): ?>
+                    <option value="<?= $value ?>"><?= $label ?></option>
+                <?php endforeach; ?>
             </select>
 
             <label for="cage">Номер клетки:</label>
@@ -106,7 +173,7 @@ require_once 'db.php';
         </form>
         <div class="action-buttons">
             <a href="view.php" class="btn">Просмотреть данные из БД</a>
-            <a href="import.php" class="btn">Импорт из CSV в БД</a>
+            <a href="sections.php" class="btn">Посмотреть секции</a>
         </div>
     </div>
     <div style="margin-top: 20px;">
@@ -131,6 +198,17 @@ require_once 'db.php';
 
             return true;
         }
+        
+        // Автоматическое обновление секции при выборе животного
+        document.getElementById('animal').addEventListener('change', function() {
+            const animal = this.value;
+            const sectionSelect = document.getElementById('sectionSelect');
+            const animalMap = <?= json_encode($animalSectionMap) ?>;
+            
+            if (animalMap[animal]) {
+                sectionSelect.value = animalMap[animal];
+            }
+        });
     </script>
 </body>
 </html>

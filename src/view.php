@@ -1,6 +1,10 @@
 <?php
 require_once 'db.php';
-
+$sectionNames = [
+    'mammals' => 'Млекопитающие',
+    'reptiles' => 'Рептилии',
+    'birds' => 'Птицы'
+];
 if (isset($_GET['delete_id'])) {
     try {
         $stmt = $pdo->prepare("DELETE FROM zoo_db WHERE id = ?");
@@ -122,6 +126,7 @@ try {
             <thead>
                 <tr>
                     <th>ID</th>
+                    <th>Секция</th>
                     <th>Животное</th>
                     <th>Клетка</th>
                     <th>Условия содержания</th>
@@ -133,6 +138,7 @@ try {
                 <tr>
                     <td><?= htmlspecialchars($animal['id']) ?></td>
                     <td><?= htmlspecialchars($animal['animal']) ?></td>
+                    <td><?= htmlspecialchars($sectionNames[$animal['section']] ?? 'Неизвестно') ?></td>
                     <td><?= htmlspecialchars($animal['cage']) ?></td>
                     <td><?= htmlspecialchars($animal['condition_zoo']) ?></td>
                     <td>

@@ -1,42 +1,53 @@
 <?php
 require_once 'db.php';
 
-$sections = [
-    'mammals' => [
-        'name' => 'Млекопитающие',
-        'animals' => ['Тигр', 'Слон', 'Обезьяна', 'Лев', 'Медведь', 'Жираф', 'Бегемот']
-    ],
-    'reptiles' => [
-        'name' => 'Рептилии',
-        'animals' => ['Хамелеон', 'Варан', 'Крокодил']
-    ],
-    'birds' => [
-        'name' => 'Птицы',
-        'animals' => ['Сокол']
-    ]
+// Определяем названия секций
+$sectionNames = [
+    'mammals' => 'Млекопитающие',
+    'reptiles' => 'Рептилии',
+    'birds' => 'Птицы'
 ];
 
-try {
-    $stmt = $pdo->query("SELECT animal, cage, COUNT(*) as count FROM zoo_db GROUP BY animal, cage");
-    $allAnimals = $stmt->fetchAll();
-} catch (PDOException $e) {
-    die("Ошибка при получении данных: " . $e->getMessage());
-}
-
+// Инициализируем переменную
 $sectionData = [];
-foreach ($allAnimals as $animal) {
-    foreach ($sections as $sectionId => $section) {
-        if (in_array($animal['animal'], $section['animals'])) {
-            if (!isset($sectionData[$sectionId])) {
-                $sectionData[$sectionId] = [
-                    'name' => $section['name'],
-                    'animals' => []
-                ];
-            }
-            $sectionData[$sectionId]['animals'][] = $animal;
-            break;
+
+try {
+    // Получаем данные из БД и группируем по секциям
+    $stmt = $pdo->query("
+        SELECT 
+            section,
+            animal,
+            cage,
+            COUNT(*) as count
+        FROM zoo_db
+        GROUP BY section, animal, cage
+        ORDER BY section, animal
+    ");
+    
+    // Группируем результаты по секциям
+    while ($row = $stmt->fetch()) {
+        $section = $row['section'];
+        if (!isset($sectionData[$section])) {
+            $sectionData[$section] = [
+                'name' => $sectionNames[$section] ?? $section,
+                'animals' => []
+            ];
+        }
+        $sectionData[$section]['animals'][] = $row;
+    }
+    
+    // Если данных нет - создаем пустые секции
+    foreach ($sectionNames as $key => $name) {
+        if (!isset($sectionData[$key])) {
+            $sectionData[$key] = [
+                'name' => $name,
+                'animals' => []
+            ];
         }
     }
+    
+} catch (PDOException $e) {
+    die("Ошибка при получении данных: " . $e->getMessage());
 }
 ?>
 
@@ -124,31 +135,21 @@ foreach ($allAnimals as $animal) {
         <div class="section">
             <h2><?= htmlspecialchars($section['name']) ?></h2>
             
-            <?php 
-            $groupedAnimals = [];
-            foreach ($section['animals'] as $animal) {
-                $name = $animal['animal'];
-                if (!isset($groupedAnimals[$name])) {
-                    $groupedAnimals[$name] = [];
-                }
-                $groupedAnimals[$name][] = $animal;
-            }
-            ?>
-            
-            <?php foreach ($groupedAnimals as $animalName => $animals): ?>
-            <div class="animal-group">
-                <div class="animal-name"><?= htmlspecialchars($animalName) ?></div>
-                
-                <?php foreach ($animals as $animal): ?>
-                <div class="cage-info">
-                    <span class="cage-number">Клетка №<?= htmlspecialchars($animal['cage']) ?></span>
-                    <?php if ($animal['count'] > 1): ?>
-                    <span class="animal-count">(<?= $animal['count'] ?> особи)</span>
-                    <?php endif; ?>
+            <?php if (empty($section['animals'])): ?>
+                <p>В этой секции пока нет животных</p>
+            <?php else: ?>
+                <?php foreach ($section['animals'] as $animal): ?>
+                <div class="animal-group">
+                    <div class="animal-name"><?= htmlspecialchars($animal['animal']) ?></div>
+                    <div class="cage-info">
+                        <span class="cage-number">Клетка №<?= htmlspecialchars($animal['cage']) ?></span>
+                        <?php if ($animal['count'] > 1): ?>
+                        <span class="animal-count">(<?= $animal['count'] ?> особи)</span>
+                        <?php endif; ?>
+                    </div>
                 </div>
                 <?php endforeach; ?>
-            </div>
-            <?php endforeach; ?>
+            <?php endif; ?>
         </div>
         <?php endforeach; ?>
         
