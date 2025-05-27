@@ -2,10 +2,12 @@ version: '3.8'
 
 services:
   php-apache:
-    image: php:8.1-apache
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: php-apache
     volumes:
-      - ./src:/var/www/html
+      - .:/var/www/html
     ports:
       - "8080:80"
     depends_on:
@@ -15,6 +17,8 @@ services:
       MYSQL_USER: root
       MYSQL_PASSWORD: root
       MYSQL_DATABASE: testdb
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
 
   mysql:
     image: mysql:8.0.41
