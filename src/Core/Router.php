@@ -9,6 +9,21 @@ class Router
             'controller' => 'Zoo',
             'action' => 'addAnimal'
         ],
+        '/report/pdf' => [
+        'controller' => 'Report',
+        'action' => 'generate',
+        'params' => ['pdf']
+        ],
+        '/report/excel' => [
+            'controller' => 'Report',
+            'action' => 'generate',
+            'params' => ['excel']
+        ],
+        '/report/csv' => [
+            'controller' => 'Report',
+            'action' => 'generate',
+            'params' => ['csv']
+        ],
         '/profile' => [
         'controller' => 'Profile',
         'action' => 'index'
@@ -55,7 +70,6 @@ class Router
     {
         $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     
-        // Пропускаем проверку для публичных маршрутов
         $publicRoutes = ['/login', '/register', '/assets'];
         if (!in_array($path, $publicRoutes)) {
             if (!isset($_SESSION['user'])) {
@@ -67,17 +81,16 @@ class Router
         
         if (array_key_exists($path, $this->routes)) {
             $route = $this->routes[$path];
-            
             $controllerName = "App\\Controller\\" . $route['controller'] . "Controller";
             $action = $route['action'];
+            $params = $route['params'] ?? [];
             
             if (class_exists($controllerName) && method_exists($controllerName, $action)) {
-                (new $controllerName())->$action();
+                (new $controllerName())->$action(...$params);
                 return;
             }
         }
         
-        // Если маршрут не найден
         http_response_code(404);
         echo "Страница не найдена";
     }

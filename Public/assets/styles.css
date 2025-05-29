@@ -229,3 +229,25 @@ table th {
 .sections-list a:hover {
     background-color: #45a049;
 }
+.btn-pdf {
+    background-color: #e74c3c;
+}
+
+.btn-excel {
+    background-color: #2ecc71;
+}
+
+.btn-csv {
+    background-color: #3498db;
+}
+
+.report-actions {
+    margin: 20px 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.report-actions h3 {
+    margin-top: 0;
+}

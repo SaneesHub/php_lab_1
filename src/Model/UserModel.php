@@ -3,6 +3,7 @@ namespace App\Model;
 
 use App\Core\Database;
 use RuntimeException;
+use InvalidArgumentException;
 
 class UserModel {
     private $pdo;
@@ -48,14 +49,23 @@ class UserModel {
         $stmt->execute([$username]);
         return $stmt->fetch();
     }
-    public function getAllUsers()
+    public function getAllUsers(): array
     {
-        return $this->pdo->query("SELECT id, username, role FROM users")->fetchAll();
+        return $this->pdo->query(
+            "SELECT id, username, role FROM users ORDER BY username"
+        )->fetchAll();
     }
 
-    public function updateRole($userId, $role)
+    public function updateUserRole(int $userId, string $role): bool
     {
-        $stmt = $this->pdo->prepare("UPDATE users SET role = ? WHERE id = ?");
+        $allowedRoles = ['visitor', 'keeper', 'admin'];
+        if (!in_array($role, $allowedRoles)) {
+            throw new InvalidArgumentException("Недопустимая роль");
+        }
+
+        $stmt = $this->pdo->prepare(
+            "UPDATE users SET role = ? WHERE id = ?"
+        );
         return $stmt->execute([$role, $userId]);
     }
     public function verifyUser($username, $password)

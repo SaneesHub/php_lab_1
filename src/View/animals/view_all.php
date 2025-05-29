@@ -30,7 +30,9 @@ $sectionNames = [
                     <th>Секция</th>
                     <th>Клетка</th>
                     <th>Условия содержания</th>
-                    <th>Действия</th>
+                    <?php if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'admin'): ?>
+                        <th>Действия</th>
+                    <?php endif; ?>
                 </tr>
             </thead>
             <tbody>
@@ -41,13 +43,15 @@ $sectionNames = [
                     <td><?= htmlspecialchars($sectionNames[$animal['section']] ?? 'Неизвестно') ?></td>
                     <td><?= htmlspecialchars($animal['cage']) ?></td>
                     <td><?= htmlspecialchars($animal['condition_zoo']) ?></td>
-                    <td>
-                        <a href="/view?delete_id=<?= $animal['id'] ?>" 
-                           class="btn btn-danger"
-                           onclick="return confirm('Вы уверены?')">
-                            Удалить
-                        </a>
-                    </td>
+                    <?php if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'admin'): ?>
+                        <td>
+                            <a href="/view?delete_id=<?= $animal['id'] ?>" 
+                            class="btn btn-danger"
+                            onclick="return confirm('Вы уверены?')">
+                                Удалить
+                            </a>
+                        </td>
+                    <?php endif; ?>    
                 </tr>
                 <?php endforeach; ?>
             </tbody>

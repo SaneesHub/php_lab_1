@@ -23,15 +23,15 @@ $sectionOptions = [
     <div class="alert alert-info">
         Для продолжения <a href="/login">войдите в систему</a>
     </div>
-    <?php if (isset($_SESSION['user'])): ?>
-        <a href="/profile" class="btn">Мой профиль</a>
-    <?php endif; ?>
     <?php elseif ($_SESSION['user']['role'] !== 'admin'): ?>
         <div class="alert alert-danger">
             Доступ запрещен. Требуются права администратора.
         </div>
     <?php else: ?>
     <div class="container">
+        <?php if (isset($_SESSION['user'])): ?>
+            <a href="/profile" class="btn">Мой профиль</a>
+        <?php endif; ?>
         <h2>Добавить животное</h2>
 
         <?php if (isset($error)): ?>

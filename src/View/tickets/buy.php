@@ -14,7 +14,7 @@
         <?php if (isset($_GET['success'])): ?>
             <div class="alert alert-success">Билеты успешно оформлены!</div>
         <?php endif; ?>
-        
+        <?php $errors=[]?>
         <?php if (!empty($errors)): ?>
             <?php foreach ($errors as $error): ?>
                 <div class="alert alert-danger"><?= $error ?></div>
@@ -59,7 +59,7 @@
             
             <div class="action-buttons">
                 <button type="submit">Купить билеты</button>
-                <a href="/view" class="btn">Просмотреть данные из БД</a>
+                <a href="/view" class="btn">Просмотреть всех животных</a>
                 <a href="/sections" class="btn">Посмотреть секции</a>
                 <?php if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'admin'): ?>
                     <a href="/" class="btn">Добавить животное</a>
